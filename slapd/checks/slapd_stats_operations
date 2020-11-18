@@ -76,7 +76,7 @@ def check_slapd_stats_operations(item, params, info):
             else:
                 status = max(status, 0)
                 
-            perfdata.append((line[1], rate, warn, crit))
+            perfdata.append(("slapd_%s" % line[1].lower(), rate, warn, crit))
         
     # deviance check    
     warn_dev, crit_dev = params.get('deviance', (0, 0) )

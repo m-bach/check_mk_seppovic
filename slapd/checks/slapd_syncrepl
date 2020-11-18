@@ -59,7 +59,7 @@ def check_slapd_syncrepl(item, params, info):
         if status == 0:
             output = "Directory in sync with all Providers"
 
-    return (status, output, [("Deltatime", value, warn, crit)])
+    return (status, output, [("time_offset", value, warn, crit)])
 
 
 check_info["slapd_syncrepl"] = {

@@ -57,7 +57,7 @@ def check_slapd_stats_waiters(item, params, info):
                 status = max(status, 0)
                 output += "%s Waiters: %d; " % (op, value)
         
-            perfdata.append((op, value, warn, crit))
+            perfdata.append(("slapd_waiters_%s" % op.lower(), value, warn, crit))
     
     if output == '':
         # In case of missing information we assume that the login into

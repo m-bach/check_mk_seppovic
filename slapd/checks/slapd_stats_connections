@@ -41,6 +41,9 @@ def check_slapd_stats_connections(item, params, info):
     output   = ''
     status = 0
     this_time = time.time()
+
+    map_metric = { 'Total': 'connections',
+                   'Current': 'active' }
     
     for line in info:
         instance, op, value = line  
@@ -54,7 +57,7 @@ def check_slapd_stats_connections(item, params, info):
             
                 countername = "slapd.stats.connections.%s" % op
                 rate = get_rate(countername, this_time, value)
-                r_warn, r_crit = params.get("rate", (0.0, 0.0))
+                r_warn, r_crit = params.get("connections_rate", (0.0, 0.0))
                 
                 perfdata.append(("rate", rate, r_warn, r_crit))
                 if r_crit != 0 and rate >= r_crit:
@@ -80,7 +83,7 @@ def check_slapd_stats_connections(item, params, info):
                 status = max(status, 0)
                 output += "%s Connections: %d; " % (op, value)
             
-            perfdata.append((op, value, warn, crit))
+            perfdata.append((map_metric[op], value, warn, crit))
     
     if output == '':
         # In case of missing information we assume that the login into

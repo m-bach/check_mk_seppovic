@@ -56,7 +56,7 @@ def check_slapd_instance(item, params, info):
                 status = max(status, 0)
                 output += "Connected in %.2f seconds" % value
                 
-            return (status, output, [("ConnectionTime", value, warn, crit)]) 
+            return (status, output, [("connection_time", value, warn, crit)])
 
 
 check_info["slapd_instance"] = {

@@ -38,7 +38,7 @@ def _valuespec_agent_config_slapd():
                     )),
                 ],
                 title=_("Instance config"),
-                optional_keys=["server", "version", "suffix"],
+                optional_keys=["server", "version", "suffix", "syncrepl"],
             ),
         ]),
         add_label=_("Add slapd Instance"),

@@ -59,7 +59,7 @@ def check_slapd_stats_connections(item, params, info):
                 rate = get_rate(countername, this_time, value)
                 r_warn, r_crit = params.get("connections_rate", (0.0, 0.0))
                 
-                perfdata.append(("rate", rate, r_warn, r_crit))
+                perfdata.append(("connections_rate", rate, r_warn, r_crit))
                 if r_crit != 0 and rate >= r_crit:
                     status = max(status, 2)
                     output += "Connectionrate: %.2f(!!) warn/crit=%.2f/%.2f; " % (rate, r_warn, r_crit)

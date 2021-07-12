@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8; py-indent-offset: 4 -*-
+
+# 2021 Heinlein Consulting GmbH
+#      Robert Sander <r.sander@heinlein-support.de>
+
 #################################################################
 #---------------------------------------------------------------#
 # Author: Markus Weber                                          #
@@ -19,86 +23,76 @@
 # ldap-slave1,Current,16
 
 
+from .agent_based_api.v1 import (
+    check_levels,
+    get_rate,
+    get_value_store,
+    register,
+    render,
+    Result,
+    Metric,
+    State,
+    ServiceLabel,
+    Service,
+)
+import time
 
+def parse_slapd_stats_connections(string_table):
+    section = {}
+    for instance, key, value in string_table:
+        if not instance in section:
+            section[instance] = {}
+        section[instance][key] = int(value)
+    return section
 
-# no default thresholds
-# factory_settings["slapd_stats_connections_defaults"] = {
-#                                                         "Current": (0, 0),
-#                                                         "rate": (0.0, 0.0),
-#                                                         "Total": (0, 0),
-# }
+register.agent_section(
+    name="slapd_stats_connections",
+    parse_function=parse_slapd_stats_connections,
+)
 
-def inventory_slapd_stats_connections(info):
-    inv = []
-    for line in info:
-        if (line[0], {}) not in inv:
-            inv.append((line[0], {}))
-    return inv
- 
+def discover_slapd_stats_connections(section):
+    for instance in section:
+        yield Service(item=instance)
 
-def check_slapd_stats_connections(item, params, info):
-    perfdata = []
-    output   = ''
-    status = 0
-    this_time = time.time()
-
-    map_metric = { 'Total': 'connections',
-                   'Current': 'active' }
+def check_slapd_stats_connections(item, params, section):
+    map_metric = {
+        'Total': 'connections',
+        'Current': 'active',
+    }
     
-    for line in info:
-        instance, op, value = line  
-        warn, crit = params.get(op, (0, 0) )
-        warn = savefloat(warn)
-        crit = savefloat(crit)
-        
-        if instance == item:
+    if item in section:
+        now = time.time()
+        vs = get_value_store()
+
+        for op, value in section[item].items():
             if op == "Total":
-                value = saveint(value)
-            
-                countername = "slapd.stats.connections.%s" % op
-                rate = get_rate(countername, this_time, value)
-                r_warn, r_crit = params.get("connections_rate", (0.0, 0.0))
-                
-                perfdata.append(("connections_rate", rate, r_warn, r_crit))
-                if r_crit != 0 and rate >= r_crit:
-                    status = max(status, 2)
-                    output += "Connectionrate: %.2f(!!) warn/crit=%.2f/%.2f; " % (rate, r_warn, r_crit)
-                elif r_warn != 0 and rate >= r_warn:
-                    status = max(status, 1)
-                    output += "Connectionrate: %.2f(!) warn/crit=%.2f/%.2f; " % (rate, r_warn, r_crit)
-                else:
-                    status = max(status, 0)
-                    output += "Connectionrate: %.2f; " % rate
-               
-            if op == "Current":
-                value = saveint(value)
-                
-            if crit != 0 and value >= crit:
-                status = max(status, 2)
-                output += "%s Connections: %d (!!) warn/crit=%.2f/%.2f; " % (op, value, warn, crit)
-            elif warn != 0 and value >= warn:
-                status = max(status, 1)
-                output += "%s Connections: %d (!) warn/crit=%.2f/%.2f; " % (op, value, warn, crit)
-            else:
-                status = max(status, 0)
-                output += "%s Connections: %d; " % (op, value)
-            
-            perfdata.append((map_metric[op], value, warn, crit))
-    
-    if output == '':
-        # In case of missing information we assume that the login into
-        # LDAP has failed and we simply skip this check. It won't
-        # switch to UNKNOWN, but will get stale.
-        raise MKCounterWrapped("No LDAP Connection available.")
-  
-    return (status, output, perfdata)
-    
+                rate = get_rate(
+                    vs,
+                    "slapd.stats.connections.%s" % op,
+                    now,
+                    value)
+                yield from check_levels(
+                    rate,
+                    levels_upper=params.get("connections_rate"),
+                    metric_name="connections_rate",
+                    label="Connection Rate",
+                    render_func=lambda x: "%.2f/s" % x,
+                )
+            yield from check_levels(
+                value,
+                levels_upper=params.get(op),
+                metric_name=map_metric[op],
+                label="%s Connections" % op,
+                render_func=lambda x: "%d" % x,
+            )
 
-# check_info["slapd_stats_connections"] = {
-#     'default_levels_variable': "slapd_stats_connections_defaults",
-#     'check_function':          check_slapd_stats_connections,
-#     'inventory_function':      inventory_slapd_stats_connections,
-#     'service_description':     'SLAPD %s Connections',
-#     'has_perfdata':            True,
-#     'group':                   'slapd_stats_connections',
-# }
+register.check_plugin(
+    name="slapd_stats_connections",
+    service_name="SLAPD %s Connections",
+    sections=["slapd_stats_connections"],
+    discovery_function=discover_slapd_stats_connections,
+    check_function=check_slapd_stats_connections,
+    check_default_parameters={
+    },
+    check_ruleset_name="slapd_stats_connections",
+)

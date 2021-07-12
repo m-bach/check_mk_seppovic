@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8; py-indent-offset: 4 -*-
+
+# 2021 Heinlein Consulting GmbH
+#      Robert Sander <r.sander@heinlein-support.de>
+
 #################################################################
 #---------------------------------------------------------------#
 # Author: Markus Weber                                          #
@@ -18,55 +22,61 @@
 # ldap-master02,ldap-master01,0.00
 # ldap-master02,ldap-master03,0.00
 
+from .agent_based_api.v1 import (
+    check_levels,
+    get_rate,
+    get_value_store,
+    register,
+    render,
+    Result,
+    Metric,
+    State,
+    ServiceLabel,
+    Service,
+)
+import time
 
-# factory_settings["slapd_syncrepl_defaults"] = {
-#                                                'levels': (0.0, 0.0)
-#                                                }
+def parse_slapd_syncrepl(string_table):
+    section = {}
+    for instance, master, value in string_table:
+        if not instance in section:
+            section[instance] = {}
+        section[instance][master] = value
+    return section
 
-def inventory_slapd_syncrepl(info):
-    inv = []
-    for line in info:
-        if (line[0], {}) not in inv:
-            inv.append((line[0], {}))
-    return inv
- 
+register.agent_section(
+    name="slapd_syncrepl",
+    parse_function=parse_slapd_syncrepl,
+)
 
-def check_slapd_syncrepl(item, params, info):
-    status = 0
-    output = ''
-    perfdata = []
-    warn, crit = params.get('levels', (0.0, 0.0) )
-    
-    
-    for line in info:
-        instance, master, value = line
-        
-        if instance == item:
+def discover_slapd_syncrepl(section):
+    for instance in section:
+        for master, value in section[instance].items():
+            yield Service(item="%s %s" % (instance, master))
+
+def check_slapd_syncrepl(item, params, section):
+    instance, master = item.split(" ")
+    if instance in section:
+        if master in section[instance]:
+            value = section[instance][master]
             if value.startswith("ERROR"):
-                return 2, value
-            
-            value = float(value)
-            if crit != 0 and value >= crit:
-                status = max(status, 2)
-                output += "Directory not in sync with Provider %s: %.2f(!!) (warn/crit=%.2f/%.2f)" % (master, value, warn, crit)
-            elif warn != 0 and value >= warn:
-                status = max(status, 1)
-                output += "Directory not in sync with Provider %s: %.2f(!) (warn/crit=%.2f/%.2f)" % (master, value, warn, crit)
+                yield Result(state=State.CRIT,
+                             summary=value)
             else:
-                status = max(status, 0)
-                output += ""
-                
-        if status == 0:
-            output = "Directory in sync with all Providers"
+                yield from check_levels(
+                    float(value),
+                    levels_upper=params.get("levels"),
+                    label="Difference with Provider %s" % master,
+                    metric_name="time_difference",
+                    render_func=render.timespan,
+                )
 
-    return (status, output, [("time_offset", value, warn, crit)])
-
-
-# check_info["slapd_syncrepl"] = {
-#     'default_levels_variable': "slapd_syncrepl_defaults",
-#     'check_function':          check_slapd_syncrepl,
-#     'inventory_function':      inventory_slapd_syncrepl,
-#     'service_description':     'SLAPD %s syncrepl status',
-#     'has_perfdata':            True,
-#     'group':                   'slapd_syncrepl',
-# }
+register.check_plugin(
+    name="slapd_syncrepl",
+    service_name="SLAPD %s syncrepl status",
+    sections=["slapd_syncrepl"],
+    discovery_function=discover_slapd_syncrepl,
+    check_function=check_slapd_syncrepl,
+    check_default_parameters={},
+    check_ruleset_name="slapd_syncrepl",
+)

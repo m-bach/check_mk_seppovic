@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8; py-indent-offset: 4 -*-
+
+# 2021 Heinlein Consulting GmbH
+#      Robert Sander <r.sander@heinlein-support.de>
+
 #################################################################
 #---------------------------------------------------------------#
 # Author: Markus Weber                                          #
@@ -26,78 +30,71 @@
 # ldap-instance1,Modrdn,0,0
 # ldap-instance1,Compare,0,0
 
+from .agent_based_api.v1 import (
+    check_levels,
+    get_rate,
+    get_value_store,
+    register,
+    render,
+    Result,
+    Metric,
+    State,
+    ServiceLabel,
+    Service,
+)
+import time
 
+def parse_slapd_stats_operations(string_table):
+    section = {}
+    for instance, op, initiated, completed in string_table:
+        if not instance in section:
+            section[instance] = {}
+        section[instance][op] = (int(initiated), int(completed))
+    return section
 
-# no default thresholds
-# factory_settings["slapd_stats_operations_defaults"] = {
-#                                                        'deviance': (0, 0),
-#                                                        'Delete': (0, 0),
-#                                                        'Bind': (0, 0),
-#                                                        'Add': (0, 0),
-#                                                        'Abandon': (0, 0),
-#                                                        'Extended': (0, 0),
-#                                                        'Search': (0, 0),
-#                                                        'Modify': (0, 0),
-#                                                        'Unbind': (0, 0),
-#                                                        'Modrdn': (0, 0),
-#                                                        'Compare': (0, 0),
-#                                                        }
+register.agent_section(
+    name="slapd_stats_operations",
+    parse_function=parse_slapd_stats_operations,
+)
 
-def inventory_slapd_stats_operations(info):
-    inv = []
-    for line in info:
-        if (line[0], {}) not in inv:
-            inv.append((line[0], {}))
-    return inv
- 
+def discover_slapd_stats_operations(section):
+    for instance in section:
+        yield Service(item=instance)
 
-def check_slapd_stats_operations(item, params, info):
-    perfdata = []
-    output   = ''
-    status = 0
-    this_time = time.time()
+def check_slapd_stats_operations(item, params, section):
+    now = time.time()
+    vs = get_value_store()
     deviance = 0
-    
-    for line in info:
-        instance, op, initiated, completed = line
-        deviance = max(deviance, abs(saveint(initiated) - saveint(completed)))
-        warn, crit = params.get(op, (0, 0) )
-        
-        if instance == item:
-            countername = "slapd.stats.operations.%s" % op
-            rate = get_rate(countername, this_time, saveint(completed))
-            
-            if crit != 0 and rate >= crit:
-                status = max(status, 2)
-                output += "%s rate %.2f (!!); " % (op, rate)
-            elif warn != 0 and rate >= warn:
-                status = max(status, 1)
-                output += "%s rate %.2f (!!)" % (op, rate)
-            else:
-                status = max(status, 0)
-                
-            perfdata.append(("slapd_%s" % line[1].lower(), rate, warn, crit))
-        
-    # deviance check    
-    warn_dev, crit_dev = params.get('deviance', (0, 0) )
-    if crit_dev != 0 and deviance >= crit_dev:
-        status = max(status, 2)
-        output += "deviance of initiated and completed operations is %d(!!) for at least one operation type (warn/crit=%d/%d)" % (deviance, warn_dev, crit_dev)
-    elif warn_dev != 0 and deviance >= warn_dev:
-        status = max(status, 1)
-        output += "deviance of initiated and completed operations is %d(!) for at least one operation type (warn/crit=%d/%d)" % (deviance, warn_dev, crit_dev)
-    else:
-        status = max(status, 0)
-        
-    return (status, output, perfdata)
- 
 
+    if item in section:
+        for op, (initiated, completed) in section[item].items():
+            deviance = max(deviance, abs(initiated - completed))
+            rate = get_rate(
+                vs,
+                "slapd.stats.operations.%s" % op,
+                now,
+                completed)
+            yield from check_levels(
+                rate,
+                levels_upper=params.get(op),
+                metric_name="slapd_%s" % op.lower(),
+                label="%s rate" % op,
+                render_func=lambda x: "%.2f/s" % x,
+                notice_only=True,
+            )
+        yield from check_levels(
+            deviance,
+            levels_upper=params.get("deviance"),
+            label="Max. deviance of initiated and completed operations",
+        )
 
-# check_info["slapd_stats_operations"] = {
-#     'default_levels_variable': "slapd_stats_operations_defaults",
-#     'check_function':          check_slapd_stats_operations,
-#     'inventory_function':      inventory_slapd_stats_operations,
-#     'service_description':     'SLAPD %s Operations',
-#     'has_perfdata':            True,
-#     'group':                   'slapd_stats_operations',
-# }
+register.check_plugin(
+    name="slapd_stats_operations",
+    service_name="SLAPD %s Operations",
+    sections=["slapd_stats_operations"],
+    discovery_function=discover_slapd_stats_operations,
+    check_function=check_slapd_stats_operations,
+    check_default_parameters={
+    },
+    check_ruleset_name="slapd_stats_operations",
+)

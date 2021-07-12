@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8; py-indent-offset: 4 -*-
+
+# 2021 Heinlein Consulting GmbH
+#      Robert Sander <r.sander@heinlein-support.de>
+
 #################################################################
 #---------------------------------------------------------------#
 # Author: Markus Weber                                          #
@@ -20,50 +24,55 @@
 # ldap-slave2|ERROR - could not bind as cn=Monitor : Invalid credentials at ./slapd.pl line 344
 #  at ./slapd.pl line 344
 
+from .agent_based_api.v1 import (
+    check_levels,
+    register,
+    render,
+    Result,
+    Metric,
+    State,
+    ServiceLabel,
+    Service,
+)
 
-# factory_settings["slapd_instance_defaults"] = {
-#                                                'maxConnectionTime': (0.0, 0.0)
-#                                                }
+def parse_slapd_instance(string_table):
+    section = {}
+    for instance, conn_time in string_table:
+        section[instance] = conn_time
+    return section
 
-def inventory_slapd_instance(info):
-    inv = []
-    for line in info:
-        if (line[0], {}) not in inv:
-            inv.append((line[0], {}))
-    return inv
- 
+register.agent_section(
+    name="slapd_instance",
+    parse_function=parse_slapd_instance,
+)
 
-def check_slapd_instance(item, params, info):
-    status = 0
-    output = ''
-    
-    for line in info:
-        instance, value = line
-        warn, crit = params.get('maxConnectionTime', (0.0, 0.0) )
-        
-        if instance == item:
-            if value.startswith("ERROR"):
-                return 2, value
-            
-            value = float(value)
-            if crit != 0 and value >= crit:
-                status = max(status, 2)
-                output += "Connected in %.2f (!!) seconds warn/crit=%.2f/%.2f" % (value, warn, crit)
-            elif warn != 0 and value >= warn:
-                status = max(status, 1)
-                output += "Connected in %.2f (!) seconds warn/crit=%.2f/%.2f" % (value, warn, crit)
-            else:
-                status = max(status, 0)
-                output += "Connected in %.2f seconds" % value
-                
-            return (status, output, [("connection_time", value, warn, crit)])
+def discover_slapd_instance(section):
+    for instance in section:
+        yield Service(item=instance)
 
+def check_slapd_instance(item, params, section):
+    if item in section:
+        value = section[item]
+        if value.startswith("ERROR"):
+            yield Result(state=State.CRIT,
+                         summary=value)
+        else:
+            yield from check_levels(
+                float(value),
+                levels_upper=params.get('maxConnectionTime'),
+                metric_name="connection_time",
+                label="Time to connect",
+                render_func=render.timespan,
+            )
 
-# check_info["slapd_instance"] = {
-#     'default_levels_variable': "slapd_instance_defaults",
-#     'check_function':          check_slapd_instance,
-#     'inventory_function':      inventory_slapd_instance,
-#     'service_description':     'SLAPD %s',
-#     'has_perfdata':            True,
-#     'group':                   'slapd_instance',
-# }
+register.check_plugin(
+    name="slapd_instance",
+    service_name="SLAPD %s",
+    sections=["slapd_instance"],
+    discovery_function=discover_slapd_instance,
+    check_function=check_slapd_instance,
+    check_default_parameters={
+        'maxConnectionTime': (0.5, 0.8)
+    },
+    check_ruleset_name="slapd_instance",
+)

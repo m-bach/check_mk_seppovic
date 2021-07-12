@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- encoding: utf-8; py-indent-offset: 4 -*-
 
 from cmk.gui.plugins.wato import (
@@ -7,7 +7,19 @@ from cmk.gui.plugins.wato import (
     IndividualOrStoredPassword,
 )
 
-from cmk.gui.cee.plugins.wato.agent_bakery import RulespecGroupMonitoringAgentsAgentPlugins
+from cmk.gui.cee.plugins.wato.agent_bakery.rulespecs.utils import RulespecGroupMonitoringAgentsAgentPlugins
+
+from cmk.gui.valuespec import (
+    Dictionary,
+    Hostname,
+    Integer,
+    LDAPDistinguishedName,
+    ListOf,
+    Password,
+    TextAscii,
+    Tuple,
+    Url,
+)
 
 def _valuespec_agent_config_slapd():
     return ListOf(

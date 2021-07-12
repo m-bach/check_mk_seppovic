@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- encoding: utf-8; py-indent-offset: 4 -*-
 #################################################################
 #---------------------------------------------------------------#
@@ -21,9 +21,9 @@
 #  at ./slapd.pl line 344
 
 
-factory_settings["slapd_instance_defaults"] = {
-                                               'maxConnectionTime': (0.0, 0.0)
-                                               }
+# factory_settings["slapd_instance_defaults"] = {
+#                                                'maxConnectionTime': (0.0, 0.0)
+#                                                }
 
 def inventory_slapd_instance(info):
     inv = []
@@ -59,11 +59,11 @@ def check_slapd_instance(item, params, info):
             return (status, output, [("connection_time", value, warn, crit)])
 
 
-check_info["slapd_instance"] = {
-    'default_levels_variable': "slapd_instance_defaults",
-    'check_function':          check_slapd_instance,
-    'inventory_function':      inventory_slapd_instance,
-    'service_description':     'SLAPD %s',
-    'has_perfdata':            True,
-    'group':                   'slapd_instance',
-}
+# check_info["slapd_instance"] = {
+#     'default_levels_variable': "slapd_instance_defaults",
+#     'check_function':          check_slapd_instance,
+#     'inventory_function':      inventory_slapd_instance,
+#     'service_description':     'SLAPD %s',
+#     'has_perfdata':            True,
+#     'group':                   'slapd_instance',
+# }

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- encoding: utf-8; py-indent-offset: 4 -*-
 #################################################################
 #---------------------------------------------------------------#
@@ -23,10 +23,10 @@
 
 
 # no default thresholds
-factory_settings["slapd_stats_waiters_defaults"] = {
-                                                        "Write": (0,0),
-                                                        "Read": (0,0),
-}
+# factory_settings["slapd_stats_waiters_defaults"] = {
+#                                                         "Write": (0,0),
+#                                                         "Read": (0,0),
+# }
 
 def inventory_slapd_stats_waiters(info):
     inv = []
@@ -68,11 +68,11 @@ def check_slapd_stats_waiters(item, params, info):
     return (status, output, perfdata)
     
 
-check_info["slapd_stats_waiters"] = {
-    'default_levels_variable': "slapd_stats_waiters_defaults",
-    'check_function':          check_slapd_stats_waiters,
-    'inventory_function':      inventory_slapd_stats_waiters,
-    'service_description':     'SLAPD %s Waiters',
-    'has_perfdata':            True,
-    'group':                   'slapd_stats_waiters',
-}
+# check_info["slapd_stats_waiters"] = {
+#     'default_levels_variable': "slapd_stats_waiters_defaults",
+#     'check_function':          check_slapd_stats_waiters,
+#     'inventory_function':      inventory_slapd_stats_waiters,
+#     'service_description':     'SLAPD %s Waiters',
+#     'has_perfdata':            True,
+#     'group':                   'slapd_stats_waiters',
+# }

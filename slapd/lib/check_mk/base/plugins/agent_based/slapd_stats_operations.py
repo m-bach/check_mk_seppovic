@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- encoding: utf-8; py-indent-offset: 4 -*-
 #################################################################
 #---------------------------------------------------------------#
@@ -29,19 +29,19 @@
 
 
 # no default thresholds
-factory_settings["slapd_stats_operations_defaults"] = {
-                                                       'deviance': (0, 0),
-                                                       'Delete': (0, 0),
-                                                       'Bind': (0, 0),
-                                                       'Add': (0, 0),
-                                                       'Abandon': (0, 0),
-                                                       'Extended': (0, 0),
-                                                       'Search': (0, 0),
-                                                       'Modify': (0, 0),
-                                                       'Unbind': (0, 0),
-                                                       'Modrdn': (0, 0),
-                                                       'Compare': (0, 0),
-                                                       }
+# factory_settings["slapd_stats_operations_defaults"] = {
+#                                                        'deviance': (0, 0),
+#                                                        'Delete': (0, 0),
+#                                                        'Bind': (0, 0),
+#                                                        'Add': (0, 0),
+#                                                        'Abandon': (0, 0),
+#                                                        'Extended': (0, 0),
+#                                                        'Search': (0, 0),
+#                                                        'Modify': (0, 0),
+#                                                        'Unbind': (0, 0),
+#                                                        'Modrdn': (0, 0),
+#                                                        'Compare': (0, 0),
+#                                                        }
 
 def inventory_slapd_stats_operations(info):
     inv = []
@@ -93,11 +93,11 @@ def check_slapd_stats_operations(item, params, info):
  
 
 
-check_info["slapd_stats_operations"] = {
-    'default_levels_variable': "slapd_stats_operations_defaults",
-    'check_function':          check_slapd_stats_operations,
-    'inventory_function':      inventory_slapd_stats_operations,
-    'service_description':     'SLAPD %s Operations',
-    'has_perfdata':            True,
-    'group':                   'slapd_stats_operations',
-}
+# check_info["slapd_stats_operations"] = {
+#     'default_levels_variable': "slapd_stats_operations_defaults",
+#     'check_function':          check_slapd_stats_operations,
+#     'inventory_function':      inventory_slapd_stats_operations,
+#     'service_description':     'SLAPD %s Operations',
+#     'has_perfdata':            True,
+#     'group':                   'slapd_stats_operations',
+# }

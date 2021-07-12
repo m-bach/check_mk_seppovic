@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- encoding: utf-8; py-indent-offset: 4 -*-
 #################################################################
 #---------------------------------------------------------------#
@@ -19,9 +19,9 @@
 # ldap-master02,ldap-master03,0.00
 
 
-factory_settings["slapd_syncrepl_defaults"] = {
-                                               'levels': (0.0, 0.0)
-                                               }
+# factory_settings["slapd_syncrepl_defaults"] = {
+#                                                'levels': (0.0, 0.0)
+#                                                }
 
 def inventory_slapd_syncrepl(info):
     inv = []
@@ -62,11 +62,11 @@ def check_slapd_syncrepl(item, params, info):
     return (status, output, [("time_offset", value, warn, crit)])
 
 
-check_info["slapd_syncrepl"] = {
-    'default_levels_variable': "slapd_syncrepl_defaults",
-    'check_function':          check_slapd_syncrepl,
-    'inventory_function':      inventory_slapd_syncrepl,
-    'service_description':     'SLAPD %s syncrepl status',
-    'has_perfdata':            True,
-    'group':                   'slapd_syncrepl',
-}
+# check_info["slapd_syncrepl"] = {
+#     'default_levels_variable': "slapd_syncrepl_defaults",
+#     'check_function':          check_slapd_syncrepl,
+#     'inventory_function':      inventory_slapd_syncrepl,
+#     'service_description':     'SLAPD %s syncrepl status',
+#     'has_perfdata':            True,
+#     'group':                   'slapd_syncrepl',
+# }

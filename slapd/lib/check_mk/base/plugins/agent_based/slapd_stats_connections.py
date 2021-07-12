@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- encoding: utf-8; py-indent-offset: 4 -*-
 #################################################################
 #---------------------------------------------------------------#
@@ -22,11 +22,11 @@
 
 
 # no default thresholds
-factory_settings["slapd_stats_connections_defaults"] = {
-                                                        "Current": (0, 0),
-                                                        "rate": (0.0, 0.0),
-                                                        "Total": (0, 0),
-}
+# factory_settings["slapd_stats_connections_defaults"] = {
+#                                                         "Current": (0, 0),
+#                                                         "rate": (0.0, 0.0),
+#                                                         "Total": (0, 0),
+# }
 
 def inventory_slapd_stats_connections(info):
     inv = []
@@ -94,11 +94,11 @@ def check_slapd_stats_connections(item, params, info):
     return (status, output, perfdata)
     
 
-check_info["slapd_stats_connections"] = {
-    'default_levels_variable': "slapd_stats_connections_defaults",
-    'check_function':          check_slapd_stats_connections,
-    'inventory_function':      inventory_slapd_stats_connections,
-    'service_description':     'SLAPD %s Connections',
-    'has_perfdata':            True,
-    'group':                   'slapd_stats_connections',
-}
+# check_info["slapd_stats_connections"] = {
+#     'default_levels_variable': "slapd_stats_connections_defaults",
+#     'check_function':          check_slapd_stats_connections,
+#     'inventory_function':      inventory_slapd_stats_connections,
+#     'service_description':     'SLAPD %s Connections',
+#     'has_perfdata':            True,
+#     'group':                   'slapd_stats_connections',
+# }

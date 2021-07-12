@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- encoding: utf-8; py-indent-offset: 4 -*-
 #################################################################
 #---------------------------------------------------------------#
@@ -22,12 +22,12 @@
 
 
 # no default thresholds
-factory_settings["slapd_stats_statistics_defaults"] = {
-                                                        "Entries": (0,0),
-                                                        "Referarals": (0,0),
-                                                        "PDU": (0,0),
-                                                        "Bytes": (0,0),
-}
+# factory_settings["slapd_stats_statistics_defaults"] = {
+#                                                         "Entries": (0,0),
+#                                                         "Referarals": (0,0),
+#                                                         "PDU": (0,0),
+#                                                         "Bytes": (0,0),
+# }
 
 def inventory_slapd_stats_statistics(info):
     inv = []
@@ -72,11 +72,11 @@ def check_slapd_stats_statistics(item, params, info):
  
 
 
-check_info["slapd_stats_statistics"] = {
-    'default_levels_variable': "slapd_stats_statistics_defaults",
-    'check_function':          check_slapd_stats_statistics,
-    'inventory_function':      inventory_slapd_stats_statistics,
-    'service_description':     'SLAPD %s statistics',
-    'has_perfdata':            True,
-    'group':                   'slapd_stats_statistics',
-}
+# check_info["slapd_stats_statistics"] = {
+#     'default_levels_variable': "slapd_stats_statistics_defaults",
+#     'check_function':          check_slapd_stats_statistics,
+#     'inventory_function':      inventory_slapd_stats_statistics,
+#     'service_description':     'SLAPD %s statistics',
+#     'has_perfdata':            True,
+#     'group':                   'slapd_stats_statistics',
+# }

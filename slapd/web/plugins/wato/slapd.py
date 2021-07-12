@@ -4,10 +4,8 @@
 from cmk.gui.i18n import _
 from cmk.gui.valuespec import (
     Dictionary,
-    Integer,
     Float,
-    ListOfStrings,
-    MonitoringState,
+    Integer,
     TextAscii,
     Tuple,
 )
@@ -17,6 +15,13 @@ from cmk.gui.plugins.wato import (
     CheckParameterRulespecWithItem,
     RulespecGroupCheckParametersApplications,
 )
+
+def _item_spec_slapd():
+    return TextAscii(
+        title = _("Instance"),
+        help = _("Only needed if multiple SLAPD Instances on one server available"),
+    )
+
 
 def _parameter_valuespec_slapd_instance():
     return Dictionary(
@@ -34,17 +39,11 @@ def _parameter_valuespec_slapd_instance():
         ]
     )
 
-def _item_spec_slapd_instance():
-    return TextAscii(
-        title = _("Instance"),
-        help = _("Only needed if you have multiple SLAPD Instances on one server"),
-    )
-
 rulespec_registry.register(
     CheckParameterRulespecWithItem(
         check_group_name="slapd_instance",
         group=RulespecGroupCheckParametersApplications,
-        item_spec=_item_spec_slapd_instance,
+        item_spec=_item_spec_slapd,
         match_type="dict",
         parameter_valuespec=_parameter_valuespec_slapd_instance,
         title=lambda: _("slapd Instance"),
@@ -84,17 +83,11 @@ def _parameter_valuespec_slapd_stats_connections():
         ]
     )
 
-def _item_spec_slapd_stats_connections():
-    return TextAscii(
-        title = _("Instance"),
-        help = _("Only needed if you have multiple SLAPD Instances on one server"),
-    )
-
 rulespec_registry.register(
     CheckParameterRulespecWithItem(
         check_group_name="slapd_stats_connections",
         group=RulespecGroupCheckParametersApplications,
-        item_spec=_item_spec_slapd_stats_connections,
+        item_spec=_item_spec_slapd,
         match_type="dict",
         parameter_valuespec=_parameter_valuespec_slapd_stats_connections,
         title=lambda: _("slapd Connections"),
@@ -205,130 +198,127 @@ def _parameter_valuespec_slapd_stats_operations():
             ),
         ]
     )
-    
-def _item_spec_slapd_statsoperations():
-    return TextAscii(
-        title = _("Instance"),
-        help = _("Only needed if you have multiple SLAPD Instances on one server"),
-    )
 
 rulespec_registry.register(
     CheckParameterRulespecWithItem(
         check_group_name="slapd_stats_operations",
         group=RulespecGroupCheckParametersApplications,
-        item_spec=_item_spec_slapd_statsoperations,
+        item_spec=_item_spec_slapd,
         match_type="dict",
         parameter_valuespec=_parameter_valuespec_slapd_stats_operations,
         title=lambda: _("slapd Operations"),
     ))
 
 
-# register_check_parameters(
-#     subgroup_applications,
-#     "slapd_stats_statistics",
-#     _("slapd Network Statistics"),
-#     Dictionary(
-#         elements = [
-#             ( "Entries",
-#                 Tuple(
-#                     title = _("Entries rate"),
-#                     elements = [
-#                         Float(title = _("Warning: "), default_value = 0.0 ),
-#                         Float(title = _("Critical: "), default_value = 0.0 ),
-#                     ]
-#                 )
-#             ),
-#             ( "Referarals",
-#                 Tuple(
-#                     title = _("Referarals rate"),
-#                     elements = [
-#                         Float(title = _("Warning: "), default_value = 0.0 ),
-#                         Float(title = _("Critical: "), default_value = 0.0 ),
-#                     ]
-#                 )
-#             ),
-#             ( "PDU",
-#                 Tuple(
-#                     title = _("PDUs rate"),
-#                     elements = [
-#                         Float(title = _("Warning: "), default_value = 0.0 ),
-#                         Float(title = _("Critical: "), default_value = 0.0 ),
-#                     ]
-#                 )
-#             ),
-#              ( "Bytes",
-#                 Tuple(
-#                     title = _("Bytes rate"),
-#                     elements = [
-#                         Float(title = _("Warning: "), default_value = 0.0 ),
-#                         Float(title = _("Critical: "), default_value = 0.0 ),
-#                     ]
-#                 )
-#             ),
-#        ]
-#     ),
-#     TextAscii(
-#         title = _("Instance"),
-#         help = _("Only needed if you have multiple SLAPD Instances on one server"),
-#     ), #instance
-#     "dict",
-# )
+def _parameter_valuespec_slapd_stats_statistics():
+    return Dictionary(
+        elements = [
+            ( "Entries",
+                Tuple(
+                    title = _("Entries rate"),
+                    elements = [
+                        Float(title = _("Warning: "), default_value = 0.0 ),
+                        Float(title = _("Critical: "), default_value = 0.0 ),
+                    ]
+                )
+            ),
+            ( "Referarals",
+                Tuple(
+                    title = _("Referarals rate"),
+                    elements = [
+                        Float(title = _("Warning: "), default_value = 0.0 ),
+                        Float(title = _("Critical: "), default_value = 0.0 ),
+                    ]
+                )
+            ),
+            ( "PDU",
+                Tuple(
+                    title = _("PDUs rate"),
+                    elements = [
+                        Float(title = _("Warning: "), default_value = 0.0 ),
+                        Float(title = _("Critical: "), default_value = 0.0 ),
+                    ]
+                )
+            ),
+             ( "Bytes",
+                Tuple(
+                    title = _("Bytes rate"),
+                    elements = [
+                        Float(title = _("Warning: "), default_value = 0.0 ),
+                        Float(title = _("Critical: "), default_value = 0.0 ),
+                    ]
+                )
+            ),
+       ]
+    )
+
+rulespec_registry.register(
+    CheckParameterRulespecWithItem(
+        check_group_name="slapd_stats_statistics",
+        group=RulespecGroupCheckParametersApplications,
+        item_spec=_item_spec_slapd,
+        match_type="dict",
+        parameter_valuespec=_parameter_valuespec_slapd_stats_statistics,
+        title=lambda: _("slapd Network Statistics"),
+    ))
 
 
-# register_check_parameters(
-#     subgroup_applications,
-#     "slapd_stats_waiters",
-#     _("slapd Waiters"),
-#     Dictionary(
-#         elements = [
-#             ( "Read",
-#                 Tuple(
-#                     title = _("Read Waiters"),
-#                     elements = [
-#                         Integer(title = _("Warning: "), default_value = 0 ),
-#                         Integer(title = _("Critical: "), default_value = 0 ),
-#                     ]
-#                 )
-#             ),
-#              ( "Write",
-#                 Tuple(
-#                     title = _("Write Waiters"),
-#                     elements = [
-#                         Integer(title = _("Warning: "), default_value = 0 ),
-#                         Integer(title = _("Critical: "), default_value = 0 ),
-#                     ]
-#                 )
-#             ),
-#        ]
-#     ),
-#     TextAscii(
-#         title = _("Instance Name"),
-#         help = _("Only needed if you have multiple SLAPD Instances on one server"),
-#     ),
-#     "dict",
-# )
+def _parameter_valuespec_slapd_stats_waiters():
+    return Dictionary(
+        elements = [
+            ( "Read",
+                Tuple(
+                    title = _("Read Waiters"),
+                    elements = [
+                        Integer(title = _("Warning: "), default_value = 0 ),
+                        Integer(title = _("Critical: "), default_value = 0 ),
+                    ]
+                )
+            ),
+             ( "Write",
+                Tuple(
+                    title = _("Write Waiters"),
+                    elements = [
+                        Integer(title = _("Warning: "), default_value = 0 ),
+                        Integer(title = _("Critical: "), default_value = 0 ),
+                    ]
+                )
+            ),
+       ]
+    )
+
+rulespec_registry.register(
+    CheckParameterRulespecWithItem(
+        check_group_name="slapd_stats_waiters",
+        group=RulespecGroupCheckParametersApplications,
+        item_spec=_item_spec_slapd,
+        match_type="dict",
+        parameter_valuespec=_parameter_valuespec_slapd_stats_waiters,
+        title=lambda: _("slapd Waiters"),
+    ))
 
 
-# register_check_parameters(
-#     subgroup_applications,
-#     "slapd_syncrepl",
-#     _("slapd Syncrepl status"),
-#     Dictionary(
-#         elements = [
-#             ( "levels",
-#                 Tuple(
-#                     title = _("deltatime between Consumer and Provider"),
-#                     elements = [
-#                         Float(title = _("Warning: "), default_value = 0.0, unit = _("seconds") ),
-#                         Float(title = _("Critical: "), default_value = 0.0, unit = _("seconds") ),
-#                     ]
-#                 )
-#             ),
-#         ]
-#     ),
-#     TextAscii(
-#         title = _("Instance"),
-#         help = _("Only needed if you have multiple SLAPD Instances on one server"),
-#     ), #instance
-#     "dict",
-# )
+def _parameter_valuespec_slapd_syncrepl():
+    return Dictionary(
+        elements = [
+            ( "levels",
+                Tuple(
+                    title = _("deltatime between Consumer and Provider"),
+                    elements = [
+                        Float(title = _("Warning: "), default_value = 0.0, unit = _("seconds") ),
+                        Float(title = _("Critical: "), default_value = 0.0, unit = _("seconds") ),
+                    ]
+                )
+            ),
+        ]
+    )
+
+rulespec_registry.register(
+    CheckParameterRulespecWithItem(
+        check_group_name="slapd_syncrepl",
+        group=RulespecGroupCheckParametersApplications,
+        item_spec=_item_spec_slapd,
+        match_type="dict",
+        parameter_valuespec=_parameter_valuespec_slapd_syncrepl,
+        title=lambda: _("slapd Syncrepl status"),
+    ))

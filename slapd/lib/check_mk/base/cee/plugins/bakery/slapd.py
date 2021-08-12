@@ -34,7 +34,7 @@ def get_slapd_files(conf: Dict[str, Any]) -> FileGenerator:
                 for syncreplconf in value:
                     content += ["      {"]
                     for key, value in syncreplconf.items():
-                        content += ["      '%s' => '%s'" % (key, value)]
+                        content += ["      '%s' => '%s'," % (key, value)]
                     content += ["      },"]
                 content += ["    ],"]
             else:

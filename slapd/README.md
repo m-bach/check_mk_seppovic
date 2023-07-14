@@ -1,11 +1,6 @@
 # slapd
 Monitor openldap's slapd Operation and Network statistics via monitoring DB and replication status.
 
-# Installation
-* $ su - SITENAME
-* OMD[SITENAME]:~$ wget 'https://github.com/seppovic/check_mk-plugins/raw/master/slapd/slapd-1.1.mkp'
-* OMD[SITENAME]:~$ check_mk -P install slapd-1.1.mkp
-
 # Requirements
 * Openldap Server with accessible Monitoring DB.
 * For replication status check, the provider has to be searchable.

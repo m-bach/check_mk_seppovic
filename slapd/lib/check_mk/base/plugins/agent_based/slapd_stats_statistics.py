@@ -5,7 +5,7 @@
 #      Robert Sander <r.sander@heinlein-support.de>
 
 #################################################################
-#---------------------------------------------------------------#
+# ---------------------------------------------------------------#
 # Author: Markus Weber                                          #
 # Contact: markus.weber@lfst.bayern.de                          #
 # License: GPL                                                  #
@@ -24,19 +24,17 @@
 # ldap-slave1,PDU,213505
 # ldap-slave1,Bytes,17979195
 
-from .agent_based_api.v1 import (
-    check_levels,
+import time
+
+from cmk.agent_based.v1 import check_levels
+from cmk.agent_based.v2 import (
+    AgentSection,
+    CheckPlugin,
     get_rate,
     get_value_store,
-    register,
-    render,
-    Result,
-    Metric,
-    State,
-    ServiceLabel,
     Service,
 )
-import time
+
 
 def parse_slapd_stats_statistics(string_table):
     section = {}
@@ -46,21 +44,24 @@ def parse_slapd_stats_statistics(string_table):
         section[instance][key] = int(value)
     return section
 
-register.agent_section(
+
+agent_section_slapd_stats_statistics = AgentSection(
     name="slapd_stats_statistics",
     parse_function=parse_slapd_stats_statistics,
 )
+
 
 def discover_slapd_stats_statistics(section):
     for instance in section:
         yield Service(item=instance)
 
+
 def check_slapd_stats_statistics(item, params, section):
     map_metric = {
-        'Entries': 'slapd_entries_sent',
-        'Referrals': 'slapd_referrals_sent',
-        'PDU': 'slapd_pdu_sent',
-        'Bytes': 'net_data_sent',
+        "Entries": "slapd_entries_sent",
+        "Referrals": "slapd_referrals_sent",
+        "PDU": "slapd_pdu_sent",
+        "Bytes": "net_data_sent",
     }
 
     if item in section:
@@ -68,20 +69,17 @@ def check_slapd_stats_statistics(item, params, section):
         vs = get_value_store()
 
         for op, value in section[item].items():
-            rate = get_rate(
-                vs,
-                "slapd.stats.statistics.%s" % op,
-                now,
-                value)
+            rate = get_rate(vs, "slapd.stats.statistics.%s" % op, now, value)
             yield from check_levels(
                 rate,
                 levels_upper=params.get(op),
                 metric_name=map_metric[op],
-                label="Rate of sent %s" %op,
+                label="Rate of sent %s" % op,
                 render_func=lambda x: "%.2f/s" % x,
             )
- 
-register.check_plugin(
+
+
+check_plugin_slapd_stats_statistics = CheckPlugin(
     name="slapd_stats_statistics",
     service_name="SLAPD %s statistics",
     sections=["slapd_stats_statistics"],

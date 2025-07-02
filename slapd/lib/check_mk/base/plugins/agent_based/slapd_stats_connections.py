@@ -5,7 +5,7 @@
 #      Robert Sander <r.sander@heinlein-support.de>
 
 #################################################################
-#---------------------------------------------------------------#
+# ---------------------------------------------------------------#
 # Author: Markus Weber                                          #
 # Contact: markus.weber@lfst.bayern.de                          #
 # License: GPL                                                  #
@@ -23,19 +23,17 @@
 # ldap-slave1,Current,16
 
 
-from .agent_based_api.v1 import (
-    check_levels,
+import time
+
+from cmk.agent_based.v1 import check_levels
+from cmk.agent_based.v2 import (
+    AgentSection,
+    CheckPlugin,
     get_rate,
     get_value_store,
-    register,
-    render,
-    Result,
-    Metric,
-    State,
-    ServiceLabel,
     Service,
 )
-import time
+
 
 def parse_slapd_stats_connections(string_table):
     section = {}
@@ -45,32 +43,31 @@ def parse_slapd_stats_connections(string_table):
         section[instance][key] = int(value)
     return section
 
-register.agent_section(
+
+agent_section_slapd_stats_connections = AgentSection(
     name="slapd_stats_connections",
     parse_function=parse_slapd_stats_connections,
 )
+
 
 def discover_slapd_stats_connections(section):
     for instance in section:
         yield Service(item=instance)
 
+
 def check_slapd_stats_connections(item, params, section):
     map_metric = {
-        'Total': 'connections',
-        'Current': 'active',
+        "Total": "connections",
+        "Current": "active",
     }
-    
+
     if item in section:
         now = time.time()
         vs = get_value_store()
 
         for op, value in section[item].items():
             if op == "Total":
-                rate = get_rate(
-                    vs,
-                    "slapd.stats.connections.%s" % op,
-                    now,
-                    value)
+                rate = get_rate(vs, "slapd.stats.connections.%s" % op, now, value)
                 yield from check_levels(
                     rate,
                     levels_upper=params.get("connections_rate"),
@@ -86,13 +83,13 @@ def check_slapd_stats_connections(item, params, section):
                 render_func=lambda x: "%d" % x,
             )
 
-register.check_plugin(
+
+check_plugin_slapd_stats_connections = CheckPlugin(
     name="slapd_stats_connections",
     service_name="SLAPD %s Connections",
     sections=["slapd_stats_connections"],
     discovery_function=discover_slapd_stats_connections,
     check_function=check_slapd_stats_connections,
-    check_default_parameters={
-    },
+    check_default_parameters={},
     check_ruleset_name="slapd_stats_connections",
 )

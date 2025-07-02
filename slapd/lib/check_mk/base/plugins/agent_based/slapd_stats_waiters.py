@@ -5,7 +5,7 @@
 #      Robert Sander <r.sander@heinlein-support.de>
 
 #################################################################
-#---------------------------------------------------------------#
+# ---------------------------------------------------------------#
 # Author: Markus Weber                                          #
 # Contact: markus.weber@lfst.bayern.de                          #
 # License: GPL                                                  #
@@ -22,19 +22,14 @@
 # ldap-master02,Write,0
 # ldap-master02,Read,2
 
-from .agent_based_api.v1 import (
-    check_levels,
-    get_rate,
-    get_value_store,
-    register,
-    render,
-    Result,
-    Metric,
-    State,
-    ServiceLabel,
+
+from cmk.agent_based.v1 import check_levels
+from cmk.agent_based.v2 import (
+    AgentSection,
+    CheckPlugin,
     Service,
 )
-import time
+
 
 def parse_slapd_stats_waiters(string_table):
     section = {}
@@ -44,14 +39,17 @@ def parse_slapd_stats_waiters(string_table):
         section[instance][key] = int(value)
     return section
 
-register.agent_section(
+
+agent_section_slapd_stats_waiters = AgentSection(
     name="slapd_stats_waiters",
     parse_function=parse_slapd_stats_waiters,
 )
 
+
 def discover_slapd_stats_waiters(section):
     for instance in section:
         yield Service(item=instance)
+
 
 def check_slapd_stats_waiters(item, params, section):
     if item in section:
@@ -64,7 +62,8 @@ def check_slapd_stats_waiters(item, params, section):
                 render_func=lambda x: "%d" % x,
             )
 
-register.check_plugin(
+
+check_plugin_slapd_stats_waiters = CheckPlugin(
     name="slapd_stats_waiters",
     service_name="SLAPD %s Waiters",
     sections=["slapd_stats_waiters"],

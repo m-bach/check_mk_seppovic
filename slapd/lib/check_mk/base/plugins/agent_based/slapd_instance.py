@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 # -*- encoding: utf-8; py-indent-offset: 4 -*-
 
+# 2025 Pegasus GmbH
+#      Markus Bach <m.bach@pegasusgmbh.de>
 # 2021 Heinlein Consulting GmbH
 #      Robert Sander <r.sander@heinlein-support.de>
 
 #################################################################
-# ---------------------------------------------------------------#
+#---------------------------------------------------------------#
 # Author: Markus Weber                                          #
 # Contact: markus.weber@lfst.bayern.de                          #
 # License: GPL                                                  #
@@ -25,9 +27,9 @@
 #  at ./slapd.pl line 344
 
 
-from cmk.agent_based.v1 import check_levels
 from cmk.agent_based.v2 import (
     AgentSection,
+    check_levels,
     CheckPlugin,
     render,
     Result,

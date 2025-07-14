@@ -77,6 +77,6 @@ check_plugin_slapd_instance = CheckPlugin(
     sections=["slapd_instance"],
     discovery_function=discover_slapd_instance,
     check_function=check_slapd_instance,
-    check_default_parameters={"maxConnectionTime": (0.5, 0.8)},
+    check_default_parameters={"maxConnectionTime": ("fixed", (0.5, 0.8))},
     check_ruleset_name="slapd_instance",
 )
